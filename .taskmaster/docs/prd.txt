@@ -1,0 +1,11 @@
+I want to build a travel planner AI agent using Langchain. Following are the steps of implementation
+I would use gemini-1.5-flash chat model.
+My agent needs to plan a trip so it needs access to the following tools. Each tool should be a python function and use open source APIs to fetch data
+search_places(city)
+get_weather(city)
+find_hotels(city)
+suggest_itinerary(city, days)
+Use Langchain’s Agent and Agent Executor module, connect my planner LLM + executor + tools
+Define a good prompt to get the detailed itinerary considering the weather conditions and suggest other important things related to the place as well.
+Return the final response
+And make sure to create a virtual environment and a requirement.txt file .

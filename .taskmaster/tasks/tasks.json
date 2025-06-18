@@ -1,0 +1,144 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Project Environment and Dependencies",
+        "description": "Set up the project directory, create a Python virtual environment, and generate the requirements.txt file including necessary libraries like langchain, google-generative-ai, requests, etc.",
+        "details": "Create a project folder. Run `python -m venv .venv` to create a virtual environment. Activate the environment (`source .venv/bin/activate` on Linux/macOS, `.venv\\Scripts\\activate` on Windows). Create a `requirements.txt` file and add `langchain`, `google-generative-ai`, `requests`, `python-dotenv` (for API key management). Run `pip install -r requirements.txt`.",
+        "testStrategy": "Verify the virtual environment is created and activated. Check that `pip list` shows the installed packages from `requirements.txt`.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 2,
+        "title": "Initialize Gemini 1.5 Flash LLM",
+        "description": "Initialize the Google Gemini 1.5 Flash chat model using the Langchain library.",
+        "details": "Use the `langchain_google_genai` integration. Import the necessary class (e.g., `ChatGoogleGenerativeAI`). Instantiate the model, potentially loading the API key from environment variables using `python-dotenv`. Example: `from langchain_google_genai import ChatGoogleGenerativeAI\nimport os\nllm = ChatGoogleGenerativeAI(model='gemini-1.5-flash', google_api_key=os.getenv('GOOGLE_API_KEY'))`.",
+        "testStrategy": "Write a simple test script to instantiate the LLM and make a basic test call (e.g., `llm.invoke('Hello')`) to ensure it initializes without errors and can communicate with the API.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 3,
+        "title": "Implement search_places Tool",
+        "description": "Implement the `search_places(city)` Python function using an open-source or free-tier API to find points of interest in a given city.",
+        "details": "Create a Python function `search_places(city: str) -> str`. Use a library like `requests` to call an external API. Consider using OpenStreetMap Nominatim API for place search (check usage policies) or a free tier like Foursquare Places API. The function should take the city name, make the API call, parse the relevant results (e.g., names and types of places), and return a formatted string summary.",
+        "testStrategy": "Write unit tests for the `search_places` function. Use mock objects (e.g., `unittest.mock.patch`) to simulate API responses and verify that the function correctly handles different inputs and parses the mocked output into the expected string format.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 4,
+        "title": "Implement get_weather Tool",
+        "description": "Implement the `get_weather(city)` Python function using an open-source or free-tier API to fetch current weather conditions for a given city.",
+        "details": "Create a Python function `get_weather(city: str) -> str`. Use `requests` to call a weather API. OpenWeatherMap provides a free tier API suitable for this. The function should take the city name, call the API, extract key weather information (e.g., temperature, description, conditions like rain/sun), and return a concise string summary.",
+        "testStrategy": "Write unit tests for the `get_weather` function. Use mock objects to simulate API responses (e.g., for different weather conditions, errors) and verify that the function correctly processes the mocked data and returns the expected string output.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 5,
+        "title": "Implement find_hotels Tool",
+        "description": "Implement the `find_hotels(city)` Python function using an open-source or free-tier API to find accommodation options in a given city.",
+        "details": "Create a Python function `find_hotels(city: str) -> str`. Finding truly open-source hotel APIs is challenging. Consider using a free developer tier from a service like Amadeus for Developers (requires registration and API key) or simulate results based on general knowledge if external API integration is not feasible within constraints. The function should return a string listing potential hotel options or types of accommodation.",
+        "testStrategy": "Write unit tests for the `find_hotels` function. If using an external API, use mocks to simulate responses. Verify the function handles inputs and formats the output string correctly, even if the data is simulated or from a limited free tier.",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 6,
+        "title": "Implement suggest_itinerary Tool",
+        "description": "Implement the `suggest_itinerary(city, days)` Python function. This tool might orchestrate calls to other tools or provide a structure for the agent's final output.",
+        "details": "Create a Python function `suggest_itinerary(city: str, days: int) -> str`. This tool's implementation depends on how the agent uses it. It could be a placeholder function that signals to the agent that it's time to synthesize information, or it could internally call other tools (like `search_places`, `get_weather`) and structure the raw data before the agent finalizes the text. For a simple agent, it might just return a prompt for the agent to fill in: `f'Plan a {days}-day trip for {city} considering weather and local attractions.'`",
+        "testStrategy": "Write unit tests for the `suggest_itinerary` function. Verify it accepts city and days parameters and returns the expected string format or structure, depending on its intended role (placeholder or orchestrator).",
+        "priority": "medium",
+        "dependencies": [
+          1
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Wrap Tools for Langchain Agent",
+        "description": "Wrap the implemented Python functions (`search_places`, `get_weather`, `find_hotels`, `suggest_itinerary`) as Langchain `Tool` objects.",
+        "details": "Import `Tool` from `langchain.tools`. For each implemented function, create a `Tool` instance, providing the function itself, a name, and a description. The description is crucial as the LLM uses it to decide when to call the tool. Example: `Tool(name='search_places', func=search_places, description='Use this tool to find points of interest in a city.')`.",
+        "testStrategy": "Verify that `Tool` objects are correctly instantiated for each function with appropriate names and descriptions. Check that calling the `Tool` object's run method with sample input correctly invokes the underlying function.",
+        "priority": "high",
+        "dependencies": [
+          3,
+          4,
+          5,
+          6
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Define Agent Prompt",
+        "description": "Define a clear and effective prompt string for the Langchain agent to guide its trip planning process, ensuring it considers weather and suggests important things.",
+        "details": "Craft a detailed prompt string. It should instruct the agent on its role (travel planner), the goal (create a detailed itinerary), how to use the available tools (mentioning their purpose based on the tool descriptions), and specific requirements (consider weather, suggest important things, structure the output by day). Use placeholders for user input (city, days). Example: `You are a helpful AI travel planner. Your goal is to create a detailed {days}-day itinerary for {city}. Use the available tools to gather information about places, weather, and hotels. Consider the weather conditions when suggesting activities. Include suggestions for important things like local customs, transportation, or packing tips. Structure the itinerary day by day.`",
+        "testStrategy": "Review the prompt string for clarity, completeness, and effectiveness in guiding the LLM. Ensure it explicitly mentions considering weather and suggesting important things as per the PRD.",
+        "priority": "medium",
+        "dependencies": [
+          2
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Configure Langchain Agent and Executor",
+        "description": "Configure the Langchain Agent and Agent Executor, connecting the initialized LLM, the wrapped tools, and the defined prompt.",
+        "details": "Import necessary classes from `langchain.agents` (e.g., `create_tool_calling_agent`, `AgentExecutor`). Create the agent using `create_tool_calling_agent`, passing the LLM instance, the list of wrapped tools, and the prompt. Then, create the `AgentExecutor` instance, passing the agent and the tools. Example: `agent = create_tool_calling_agent(llm, tools, prompt)\nagent_executor = AgentExecutor(agent=agent, tools=tools, verbose=True)` (verbose is helpful for debugging).",
+        "testStrategy": "Write a test script to instantiate the agent and executor. Verify that the agent executor object is created successfully without errors, indicating that the LLM, tools, and prompt are correctly linked.",
+        "priority": "high",
+        "dependencies": [
+          2,
+          7,
+          8
+        ],
+        "status": "done",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Implement Agent Execution and Output",
+        "description": "Implement the main logic to take user input (city, days), run the configured Agent Executor, and return the final generated itinerary.",
+        "details": "Write a script or function that takes `city` and `days` as input (e.g., from command line arguments or a simple input prompt). Invoke the `agent_executor` with the user's request, formatted according to the prompt's expectations. The input dictionary should contain keys expected by the prompt template (e.g., `city`, `days`, and the main `input` key for the overall query). Process the output from the executor and present it to the user. Example: `response = agent_executor.invoke({'city': user_city, 'days': user_days, 'input': f'Plan a {user_days}-day trip to {user_city}.'})`.",
+        "testStrategy": "Perform integration tests. Run the main script with sample inputs (e.g., 'Paris', 3 days). Verify that the agent executes, calls the tools (observe verbose output), and produces a coherent itinerary that addresses the user's request, considers weather (if the weather tool was called and used), and includes suggestions.",
+        "priority": "high",
+        "dependencies": [
+          9
+        ],
+        "status": "pending",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-06-18T08:16:42.749Z",
+      "updated": "2025-06-18T08:47:43.480Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
